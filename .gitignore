@@ -1,0 +1,27 @@
+# Gradle / build
+.gradle/
+build/
+!**/src/**/build/
+out/
+.kotlin/
+
+# IntelliJ (only .run/ is shared)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Secrets and local
+.env
+.env.local
+*.log
+.DS_Store
+Thumbs.db
+
+# Corpus downloaded by script
+corpus/repos/
+
+# Python (research/)
+research/.venv/
+__pycache__/
+.ipynb_checkpoints/
