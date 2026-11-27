@@ -9,4 +9,9 @@ class SmokeTest {
         val expected = System.getProperty("archivolt.jdk").toInt()
         assertEquals(expected, Runtime.version().feature())
     }
+
+    @Test
+    fun `deliberately failing`() {
+        assertEquals(1, 2)
+    }
 }
