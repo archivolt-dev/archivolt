@@ -40,6 +40,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Placeholder until the first Testcontainers-based tests exist.
-      - name: Integration tests
-        run: echo "No integration tests yet."
+      - name: Start local infrastructure
+        run: |
+          echo "NEO4J_PASSWORD=$(openssl rand -hex 16)" > infra/.env
+          docker compose -f infra/docker-compose.yml up -d --wait --wait-timeout 180
+
+      - name: Check APOC
+        run: |
+          set -a; . infra/.env; set +a
+          docker compose -f infra/docker-compose.yml exec -T neo4j cypher-shell -u neo4j -p "$NEO4J_PASSWORD" "RETURN apoc.version() AS apoc;"
+
+      - name: Stop local infrastructure
+        if: always()
+        run: docker compose -f infra/docker-compose.yml down -v

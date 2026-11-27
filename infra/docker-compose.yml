@@ -1,0 +1,53 @@
+# Local development infrastructure.
+#   docker compose -f infra/docker-compose.yml up -d                    # Neo4j
+#   docker compose -f infra/docker-compose.yml --profile ai up -d       # + Ollama
+#   docker compose -f infra/docker-compose.yml --profile gitops up -d   # + Gitea
+# Variables are read from infra/.env (copy infra/.env.example).
+
+name: archivolt
+
+services:
+  neo4j:
+    image: neo4j:2026.10.2-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?set NEO4J_PASSWORD in infra/.env (see infra/.env.example)}
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1g
+      NEO4J_server_memory_pagecache_size: 512m
+    ports:
+      - "127.0.0.1:7474:7474"   # Browser / HTTP
+      - "127.0.0.1:7687:7687"   # Bolt
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/7474' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  # Placeholder, configured in AL-055.
+  ollama:
+    image: ollama/ollama:0.40.18
+    profiles: [ai]
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+
+  # Placeholder, configured in AL-063.
+  gitea:
+    image: gitea/gitea:28.4.0
+    profiles: [gitops]
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - gitea-data:/data
+
+volumes:
+  neo4j-data:
+  neo4j-logs:
+  ollama-models:
+  gitea-data:
